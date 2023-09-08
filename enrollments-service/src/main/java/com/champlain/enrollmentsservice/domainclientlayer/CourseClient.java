@@ -30,8 +30,6 @@ public class CourseClient {
 
     }
 
-
-
     public Mono<CourseResponseDTO> getCourseByCourseId(final String courseId){
             return this.webClient
                     .get()

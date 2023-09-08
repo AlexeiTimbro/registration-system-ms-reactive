@@ -41,14 +41,14 @@ public class CourseController {
 
     @PutMapping("/{courseId}")
     public Mono<ResponseEntity<CourseResponseDTO>> updateCourse(@PathVariable String courseId, @RequestBody Mono<CourseRequestDTO> courseRequestBody){
-        return this.courseService.updateStudentById(courseRequestBody, courseId)
+        return this.courseService.updateCourse(courseRequestBody, courseId)
                 .map(course -> ResponseEntity.ok().body(course))
                 .defaultIfEmpty(ResponseEntity.notFound().build());
     }
 
     @DeleteMapping("/{courseId}")
     public Mono<ResponseEntity<Void>> deleteCourse(@PathVariable String courseId){
-        return courseService.deleteCourseById(courseId)
+        return courseService.removeCourse(courseId)
                 .then(Mono.just(ResponseEntity.noContent().<Void>build()))
                 .defaultIfEmpty(ResponseEntity.notFound().build());
     }

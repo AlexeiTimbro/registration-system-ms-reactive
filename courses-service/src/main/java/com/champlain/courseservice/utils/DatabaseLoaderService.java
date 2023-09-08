@@ -22,25 +22,45 @@ public class DatabaseLoaderService implements CommandLineRunner {
         Course course1 = Course
                 .builder()
                 .courseId(UUID.randomUUID().toString())
-                .courseNumber("G21")
-                .courseName("CST")
-                .department("Department")
-                .numHours(70)
-                .numCredits(5.00)
+                .courseNumber("123456")
+                .courseName("NAVY SEALS")
+                .department("THE DEPARTMENT")
+                .numHours(80)
+                .numCredits(8.00)
                 .build();
 
         Course course2 = Course
                 .builder()
                 .courseId(UUID.randomUUID().toString())
-                .courseNumber("I99")
-                .courseName("Business")
-                .department("Department")
-                .numHours(40)
-                .numCredits(3.00)
+                .courseNumber("234567")
+                .courseName("THE COURSE")
+                .department("THE DEPARTMENT")
+                .numHours(50)
+                .numCredits(6.00)
+                .build();
+
+        Course course3 = Course
+                .builder()
+                .courseId(UUID.randomUUID().toString())
+                .courseNumber("345678")
+                .courseName("MARINE CORP")
+                .department("THE DEPARTMENT")
+                .numHours(50)
+                .numCredits(6.00)
+                .build();
+
+        Course course4 = Course
+                .builder()
+                .courseId(UUID.randomUUID().toString())
+                .courseNumber("456789")
+                .courseName("JAVA WEB")
+                .department("COMPUTER SCIENCE")
+                .numHours(50)
+                .numCredits(6.00)
                 .build();
 
 
-        Flux.just(course1, course2)
+        Flux.just(course1, course2, course3, course4)
                 .flatMap(courseRepository::insert)
                 .log()
                 .subscribe();

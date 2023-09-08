@@ -16,9 +16,10 @@ spring:
       port: 0
       database: students
 
+de.flapdoodle:
   mongodb:
       embedded:
-        version: 4.0.21
+        version: 5.0.5
 
 ---
 spring:

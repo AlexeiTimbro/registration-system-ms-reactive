@@ -4,6 +4,7 @@ import com.champlain.studentsservice.dataaccesslayer.StudentRepository;
 import com.champlain.studentsservice.presentationlayer.StudentRequestDTO;
 import com.champlain.studentsservice.presentationlayer.StudentResponseDTO;
 import com.champlain.studentsservice.utils.EntityDTOUtils;
+import com.champlain.studentsservice.utils.exceptions.InvalidInputException;
 import com.champlain.studentsservice.utils.exceptions.NotFoundException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -27,9 +28,11 @@ public class StudentServiceImpl implements StudentService{
 
     @Override
     public Mono<StudentResponseDTO> getStudentById(String studentId) {
+
         return studentRepository.findStudentByStudentId(studentId)
                 .switchIfEmpty(Mono.error(new NotFoundException("No student with this studentId was found: " + studentId)))
                 .map(EntityDTOUtils::toStudentResponseDTO);
+
     }
 
     @Override
@@ -45,7 +48,17 @@ public class StudentServiceImpl implements StudentService{
 
     @Override
     public Mono<StudentResponseDTO> updateStudentById(Mono<StudentRequestDTO> studentRequestDTO,String studentId) {
-        return studentRepository.findStudentByStudentId(studentId).flatMap(student ->
+
+        /*
+        if(studentId.length() != 36){
+            return Mono.error(new InvalidInputException("The student ID needs to be 36 characters: " + studentId));
+        }
+
+         */
+
+        return studentRepository.findStudentByStudentId(studentId)
+                .switchIfEmpty(Mono.error(new NotFoundException("Student with this Id wasn't found: " + studentId)))
+                .flatMap(student ->
                         studentRequestDTO
                                 .map(EntityDTOUtils::toStudentEntity)
                                 .doOnNext(e -> {
@@ -59,10 +72,14 @@ public class StudentServiceImpl implements StudentService{
 
     @Override
     public Mono<Void> deleteStudentById(String studentId) {
+
+        if(studentId.length() != 36){
+            return Mono.error(new InvalidInputException("The student ID needs to be 36 characters: " + studentId));
+        }
+
         return studentRepository.findStudentByStudentId(studentId)
+                .switchIfEmpty(Mono.error(new NotFoundException("Student with this Id wasn't found: " + studentId)))
                 .flatMap(studentRepository::delete);
     }
-
-
 
 }

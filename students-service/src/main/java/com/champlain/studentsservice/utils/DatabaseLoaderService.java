@@ -21,34 +21,34 @@ public class DatabaseLoaderService implements CommandLineRunner {
         Student student1 = Student
                 .builder()
                 .studentId(UUID.randomUUID().toString())
-                .firstName("Micheal")
-                .lastName("Jordan")
-                .program("Computer Science")
+                .firstName("Lebron")
+                .lastName("James")
+                .program("Political Science")
                 .build();
 
 
         Student student2 = Student
                 .builder()
                 .studentId(UUID.randomUUID().toString())
-                .firstName("Cristiano")
-                .lastName("Ronaldo")
-                .program("Computer Science")
+                .firstName("Erling")
+                .lastName("Haaland")
+                .program("Political Science")
                 .build();
 
         Student student3 = Student
                 .builder()
                 .studentId(UUID.randomUUID().toString())
-                .firstName("Muhammad")
-                .lastName("Ali")
-                .program("Computer Science")
+                .firstName("Mike")
+                .lastName("Tyson")
+                .program("Political Science")
                 .build();
 
         Student student4 = Student
                 .builder()
                 .studentId(UUID.randomUUID().toString())
                 .firstName("Micheal")
-                .lastName("Phelps")
-                .program("Computer Science")
+                .lastName("Jordan")
+                .program("Political Science")
                 .build();
 
 

@@ -44,7 +44,7 @@ services:
     container_name: pgadmin
     restart: always
     environment:
-      - PGADMIN_DEFAULT_EMAIL=admin@iantomasi.com
+      - PGADMIN_DEFAULT_EMAIL=admin@timbro.com
       - PGADMIN_DEFAULT_PASSWORD=admin
     ports:
       - 9000:80

@@ -1,6 +1,7 @@
 package com.champlain.enrollmentsservice.utils;
 
 import com.champlain.enrollmentsservice.businesslayer.RequestContextAdd;
+import com.champlain.enrollmentsservice.businesslayer.RequestContextUpdate;
 import com.champlain.enrollmentsservice.dataaccesslayer.Enrollment;
 import com.champlain.enrollmentsservice.presentationlayer.EnrollmentResponseDTO;
 
@@ -22,20 +23,34 @@ public class EntityDTOUtils {
             return Enrollment.builder()
                     .enrollmentId(generateUUIDString())
                     .courseId(rc.getCourseResponseDTO().getCourseId())
+                    .studentId(rc.getStudentResponseDTO().getStudentId())
                     .enrollmentYear(rc.getEnrollmentRequestDTO().getEnrollmentYear())
-                    .courseName(rc.getCourseResponseDTO().getCourseName())
                     .courseNumber(rc.getCourseResponseDTO().getCourseNumber())
+                    .courseName(rc.getCourseResponseDTO().getCourseName())
                     .semester(rc.getEnrollmentRequestDTO().getSemester())
                     .studentFirstName(rc.getStudentResponseDTO().getFirstName())
                     .studentLastName(rc.getStudentResponseDTO().getLastName())
-                    .studentId(rc.getStudentResponseDTO().getStudentId())
                     .build();
         }
 
+        public static Enrollment toUpdatedEnrollmentEntity(RequestContextUpdate rcu){
+            Enrollment existingEnrollment = rcu.getEnrollment();
+            return Enrollment.builder()
+                    .enrollmentId(existingEnrollment.getEnrollmentId())
+                    .courseId(rcu.getCourseResponseDTO().getCourseId())
+                    .studentId(rcu.getStudentResponseDTO().getStudentId())
+                    .enrollmentYear(rcu.getEnrollmentRequestDTO().getEnrollmentYear())
+                    .courseNumber(rcu.getCourseResponseDTO().getCourseNumber())
+                    .courseName(rcu.getCourseResponseDTO().getCourseName())
+                    .semester(rcu.getEnrollmentRequestDTO().getSemester())
+                    .studentFirstName(rcu.getStudentResponseDTO().getFirstName())
+                    .studentLastName(rcu.getStudentResponseDTO().getLastName())
+                    .id(existingEnrollment.getId())
+                    .build();
+        }
         public static String generateUUIDString(){
             return UUID.randomUUID().toString();
+
         }
-
-
 
 }
