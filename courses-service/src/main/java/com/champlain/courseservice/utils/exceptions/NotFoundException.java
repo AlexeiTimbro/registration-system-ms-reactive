@@ -2,7 +2,6 @@ package com.champlain.courseservice.utils.exceptions;
 
 public class NotFoundException extends RuntimeException{
 
-
     public NotFoundException(){}
 
     public NotFoundException(String message) { super(message); }

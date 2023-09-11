@@ -26,35 +26,27 @@ public class EnrollmentServiceImpl implements EnrollmentService {
     private final CourseClient courseClient;
 
     @Override
-    public Flux<EnrollmentResponseDTO> getAllEnrollments(Map<String, String> queryParams) {
-        Flux<Enrollment> enrollmentFlux = enrollmentRepository.findAll();
+    public Flux<EnrollmentResponseDTO> getAllEnrollments(Map<String , String> querry) {
+        String studentid = querry.get("studentId");
+        String enrollmentYear = querry.get("enrollmentYear");
+        String courseId = querry.get("courseId");
 
-        String studentId = queryParams.get("studentId");
-        String courseId = queryParams.get("courseId");
-        String enrollmentYearParam = queryParams.get("enrollmentYear");
+        if(studentid !=null) {
+            return enrollmentRepository.findAllEnrollmentByStudentId(studentid).map(EntityDTOUtils::toEnrollmentResponseDTO);
 
-        Integer enrollmentYear = null;
-        boolean invalidYear = false;
-
-        if (enrollmentYearParam != null) {
-            try {
-                enrollmentYear = Integer.valueOf(enrollmentYearParam);
-            } catch (NumberFormatException e) {
-                invalidYear = true;
-            }
         }
-        if (invalidYear) {
-            return Flux.error(new InvalidInputException("Invalid year"));
+        if(enrollmentYear != null) {
+
+            return enrollmentRepository.findAllEnrollmentByEnrollmentYear(Integer.valueOf(enrollmentYear)).map(EntityDTOUtils::toEnrollmentResponseDTO);
         }
 
-        if (studentId != null) { enrollmentFlux = enrollmentFlux.filter(enrollments -> enrollments.getStudentId().equals(studentId)); }
-        if (courseId != null) { enrollmentFlux = enrollmentFlux.filter(enrollments -> enrollments.getCourseId().equals(courseId)); }
 
-        if (enrollmentYear != null) {
-            final Integer finalEnrollmentYear = enrollmentYear;
-            enrollmentFlux = enrollmentFlux.filter(enrollments -> enrollments.getEnrollmentYear().equals(finalEnrollmentYear));
+        if(courseId !=null){
+            return enrollmentRepository.findAllEnrollmentByCourseId(courseId).map(EntityDTOUtils::toEnrollmentResponseDTO);
         }
-        return enrollmentFlux.map(EntityDTOUtils::toEnrollmentResponseDTO);
+
+        return enrollmentRepository.findAll()
+                .map(EntityDTOUtils::toEnrollmentResponseDTO);
     }
 
 

@@ -21,8 +21,9 @@ public class EnrollmentController {
 
     private final EnrollmentService enrollmentService;
 
+
     @GetMapping(value = "", produces = MediaType.TEXT_EVENT_STREAM_VALUE)
-    public Flux<EnrollmentResponseDTO> getAllEnrollments(@RequestParam  Map<String, String> queryParams){
+    public Flux<EnrollmentResponseDTO> getAllEnrollments(@RequestParam (required= false) Map<String , String> queryParams) {
         return enrollmentService.getAllEnrollments(queryParams);
     }
 

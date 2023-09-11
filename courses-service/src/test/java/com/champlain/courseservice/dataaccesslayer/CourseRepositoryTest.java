@@ -1,4 +1,4 @@
-package com.champlain.studentsservice.dataaccesslayer;
+package com.champlain.courseservice.dataaccesslayer;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -11,28 +11,28 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.*;
 
 @DataMongoTest
-class StudentRepositoryTest {
+class CourseRepositoryTest {
 
     @Autowired
-    StudentRepository studentRepository;
+    CourseRepository courseRepository;
 
-    Student student1;
-    Student student2;
+    Course course1;
+    Course course2;
 
     @BeforeEach
     public void setupDB(){
 
-        student1 = buildStudent("Smith", "studentId_1");
-        Publisher<Student> setup1 = studentRepository.deleteAll()
-                .thenMany(studentRepository.save(student1));
+        course1 = buildCourse("Web Services", "courseId_1");
+        Publisher<Course> setup1 = courseRepository.deleteAll()
+                .thenMany(courseRepository.save(course1));
 
         StepVerifier
                 .create(setup1)
                 .expectNextCount(1)
                 .verifyComplete();
 
-        student2 = buildStudent("Tang", "studentId_2");
-        Publisher<Student> setup2 = studentRepository.save(student2);
+        course2 = buildCourse("Database", "studentId_2");
+        Publisher<Course> setup2 = courseRepository.save(course2);
 
         StepVerifier
                 .create(setup2)
@@ -42,10 +42,10 @@ class StudentRepositoryTest {
     }
 
     @Test
-    public void shouldSaveSingleStudent(){
+    public void shouldSaveSingleCourse(){
         //arrange
-        Student newStudent = buildStudent("Micheal", "studentId_3");
-        Publisher<Student> setup = studentRepository.save(newStudent);
+        Course newCourse = buildCourse("Database", "studentId");
+        Publisher<Course> setup = courseRepository.save(newCourse);
 
         //act and assert
         StepVerifier
@@ -84,12 +84,15 @@ class StudentRepositoryTest {
                 .verifyComplete();
     }
 
-    private Student buildStudent(String lastName, String studentId){
-        return Student.builder()
-                .studentId(studentId)
-                .firstName("Mary")
-                .lastName(lastName)
-                .program("CompSci")
+
+    private Course buildCourse(String courseName, String courseId){
+        return Course.builder()
+                .courseId(courseId)
+                .courseNumber("420-NA")
+                .courseName(courseName)
+                .numHours(90)
+                .numCredits(4.0)
+                .department("Computer Science")
                 .build();
     }
 }

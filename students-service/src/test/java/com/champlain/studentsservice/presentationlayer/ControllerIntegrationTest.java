@@ -8,6 +8,7 @@ import org.reactivestreams.Publisher;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.reactive.AutoConfigureWebTestClient;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.reactive.server.WebTestClient;
 import reactor.test.StepVerifier;
@@ -125,8 +126,85 @@ class ControllerIntegrationTest {
                     assertNotNull(studentResponseDTO);
                     assertNotNull(studentResponseDTO.getStudentId());
                     assertThat(studentResponseDTO.getFirstName()).isEqualTo(newStudent.getFirstName());
-                    //no need to add the other fields
                 });
+    }
+
+    @Test
+    public void updateStudent_withValidId() {
+        String validLastName = "jose";
+
+        StudentRequestDTO studentRequestDTO = StudentRequestDTO.builder()
+                .firstName(student2.getFirstName())
+                .lastName(validLastName)
+                .program(student2.getProgram()).build();
+
+        webTestClient.put()
+                .uri("/students/{studentId}",student2.getStudentId())
+                .accept(MediaType.APPLICATION_JSON)
+                .contentType(MediaType.APPLICATION_JSON)
+                .bodyValue(studentRequestDTO)
+                .exchange()
+                .expectStatus().isEqualTo(HttpStatus.OK)
+                .expectHeader()
+                .contentType(MediaType.APPLICATION_JSON)
+                .expectBody(StudentResponseDTO.class)
+                .value((studentResponseDTO -> {
+                    assertNotNull(studentResponseDTO);
+                    assertThat(studentResponseDTO.getStudentId()).isEqualTo(student2.getStudentId());
+                    assertThat(studentResponseDTO.getFirstName()).isEqualTo(student2.getFirstName());
+                    assertThat(studentResponseDTO.getLastName()).isEqualTo(validLastName);
+                    assertThat(studentResponseDTO.getProgram()).isEqualTo(student2.getProgram());
+                }));;
+    }
+
+    @Test
+    public void updateStudent_withNotFoundId() {
+        String validLastName = "jose";
+
+        String studentId="123456";
+
+        StudentRequestDTO studentRequestDTO = StudentRequestDTO.builder()
+                .firstName(student2.getFirstName())
+                .lastName(validLastName)
+                .program(student2.getProgram()).build();
+
+        webTestClient.put()
+                .uri("/students/{studentId}",studentId)
+                .accept(MediaType.APPLICATION_JSON)
+                .bodyValue(studentRequestDTO)
+                .exchange()
+                .expectStatus().isEqualTo(HttpStatus.NOT_FOUND)
+                .expectBody();
+
+    }
+
+
+    @Test
+    public void whenDeleteStudent_thenDeleteStudent() {
+
+
+        webTestClient.delete()
+                .uri("/students/{studentId}",student2.getStudentId())
+                .accept(MediaType.APPLICATION_JSON)
+                .exchange()
+                .expectStatus().isNoContent();
+
+    }
+
+    @Test
+    public void whenDeleteStudent_WithInvalidIdThrowNotFoundException() {
+
+        String invalidId= "123456";
+
+        webTestClient.delete()
+                .uri("/students/{studentId}", invalidId)
+                .accept(MediaType.APPLICATION_JSON)
+                .exchange()
+                .expectStatus().isNotFound()
+                .expectHeader().contentType(MediaType.APPLICATION_JSON)
+                .expectBody()
+                .jsonPath("$.message").isEqualTo("Student with this Id wasn't found: " + invalidId);
+
     }
 
 

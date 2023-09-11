@@ -73,9 +73,12 @@ public class StudentServiceImpl implements StudentService{
     @Override
     public Mono<Void> deleteStudentById(String studentId) {
 
+        /*
         if(studentId.length() != 36){
             return Mono.error(new InvalidInputException("The student ID needs to be 36 characters: " + studentId));
         }
+
+         */
 
         return studentRepository.findStudentByStudentId(studentId)
                 .switchIfEmpty(Mono.error(new NotFoundException("Student with this Id wasn't found: " + studentId)))
