@@ -55,31 +55,31 @@ class CourseRepositoryTest {
     }
 
     @Test
-    public void shouldGetAllStudents(){
+    public void shouldGetAllCourses(){
         //arrange
         StepVerifier
-                .create(studentRepository.findAll())
+                .create(courseRepository.findAll())
                 .expectNextCount(2)
                 .verifyComplete();
     }
 
     @Test
-    public void findStudentByValidStudentId_shouldFindOne(){
+    public void findCourseByValidCourseId_shouldFindOne(){
 
         StepVerifier
-                .create(studentRepository.findStudentByStudentId(student1.getStudentId()))
-                .assertNext(student -> {
-                    assertThat(student.getLastName().equals(student1.getLastName()));
-                    assertThat(student.getStudentId()).isEqualTo(student1.getStudentId());
+                .create(courseRepository.findCourseByCourseId(course1.getCourseId()))
+                .assertNext(course -> {
+                    assertThat(course.getCourseName().equals(course1.getCourseName()));
+                    assertThat(course.getCourseId()).isEqualTo(course1.getCourseId());
                 })
                 .verifyComplete();
     }
 
     @Test
-    public void findStudentByStudentId_NoneReturned(){
+    public void findCourseByCourseId_NoneReturned(){
 
         StepVerifier
-                .create(studentRepository.findStudentByStudentId("123"))
+                .create(courseRepository.findCourseByCourseId("123"))
                 .expectNextCount(0)
                 .verifyComplete();
     }
