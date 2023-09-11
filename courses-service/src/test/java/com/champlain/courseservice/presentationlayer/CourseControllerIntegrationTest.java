@@ -14,15 +14,15 @@ import org.springframework.test.web.reactive.server.WebTestClient;
 import reactor.test.StepVerifier;
 
 import java.nio.charset.StandardCharsets;
+import java.util.UUID;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.springframework.boot.test.context.SpringBootTest.WebEnvironment.RANDOM_PORT;
-import static org.springframework.http.MediaType.TEXT_EVENT_STREAM_VALUE;
 
-@SpringBootTest(webEnvironment = RANDOM_PORT, properties = {"spring.data.mongodb.port: 0"})
+@SpringBootTest(webEnvironment = RANDOM_PORT, properties = {"spring.data.mongodb.port= 0"})
 @AutoConfigureWebTestClient
-class CourseControllerTest {
+class CourseControllerIntegrationTest {
 
     @Autowired
     WebTestClient webTestClient;
@@ -30,60 +30,51 @@ class CourseControllerTest {
     @Autowired
     CourseRepository courseRepository;
 
-    private final Long DB_SIZE =4L;
-    Course course1= buildCourse(".net programming", "courseId_1");
-    Course course2= buildCourse("Intro to English", "courseId_2");
-    Course course3= buildCourse("Photoshop", "courseId_3");
-    Course course4= buildCourse("Php", "courseId_4");
+    private final Long DB_SIZE = 5L;
 
+    String uuid1 = UUID.randomUUID().toString();
+    String uuid2 = UUID.randomUUID().toString();
+    String uuid3 = UUID.randomUUID().toString();
+    String uuid4 = UUID.randomUUID().toString();
+    String uuid5 = UUID.randomUUID().toString();
 
+    Course course1 = buildCourse("Web Services", uuid1);
+    Course course2 = buildCourse("Database", uuid2);
+    Course course3 = buildCourse("PHP", uuid3);
+    Course course4 = buildCourse("IOT 2", uuid4);
+    Course course5 = buildCourse("Java 1", uuid5);
 
     @BeforeEach
-    public void dbSetup(){
-        Course course1= buildCourse(".net programming", "courseId_1");
-        Course course2= buildCourse("Intro to English", "courseId_2");
-        Course course3= buildCourse("Photoshop", "courseId_3");
-        Course course4= buildCourse("Php", "courseId_4");
+    public void dbSetUp(){
 
         Publisher<Course> setup = courseRepository.deleteAll()
                 .thenMany(courseRepository.save(course1))
                 .thenMany(courseRepository.save(course2))
                 .thenMany(courseRepository.save(course3))
-                .thenMany(courseRepository.save(course4));
+                .thenMany(courseRepository.save(course4))
+                .thenMany(courseRepository.save(course5));
 
-        StepVerifier
-                .create(setup)
-                .expectNextCount(1)
-                .verifyComplete();
+        StepVerifier.create(setup).expectNextCount(1).verifyComplete();
     }
 
-
     @Test
-    void getAllCourses_expect4(){
-        webTestClient
-                .get()
+    void getAllCourses_expected(){
+        webTestClient.get()
                 .uri("/courses")
-                .accept(MediaType.valueOf(TEXT_EVENT_STREAM_VALUE))
+                .accept(MediaType.valueOf(MediaType.TEXT_EVENT_STREAM_VALUE))
                 .acceptCharset(StandardCharsets.UTF_8)
                 .exchange()
                 .expectStatus().isOk()
                 .expectHeader().valueEquals("Content-Type", "text/event-stream;charset=UTF-8")
-                .expectBodyList(CourseResponseDTO.class)
-                .value((list)->{
+                .expectBodyList(CourseResponseDTO.class).value((list) -> {
                     assertNotNull(list);
-                    assertEquals(DB_SIZE, list.size());
-
-                });
-
-
-
+                    assertEquals(DB_SIZE, list.size());});
     }
 
-
     @Test
-    public void getCourseByCourseId_withValidCourseId(){
+    public void getCourseByCourseId_withValidCourseID(){
         webTestClient.get()
-                .uri("/courses/{courseId}" , course1.getCourseId())
+                .uri("/courses/{courseId}", course1.getCourseId())
                 .accept(MediaType.APPLICATION_JSON)
                 .exchange()
                 .expectStatus().isOk()
@@ -93,28 +84,39 @@ class CourseControllerTest {
     }
 
     @Test
-    void getCourseByCourseIdString_withInvalidCourseId_throwsNotFoundException(){
-        String invalidCourseId= "123";
-
-        webTestClient
-                .get()
-                .uri("/courses/{courseId}", invalidCourseId)
+    public void getCourseByCourseId_withInvalidCourseId_throwsNotFoundException(){
+        UUID uuidTest= UUID.randomUUID();
+        webTestClient.get()
+                .uri("/courses/{courseId}", uuidTest)
                 .accept(MediaType.APPLICATION_JSON)
                 .exchange()
                 .expectStatus().isNotFound()
                 .expectHeader().contentType(MediaType.APPLICATION_JSON)
                 .expectBody()
-                .jsonPath("$.message").isEqualTo("Course with this Id wasn't found: " + invalidCourseId);
+                .jsonPath("$.message").isEqualTo("Course with this Id wasn't found: " + uuidTest);
     }
 
     @Test
-    public void addNewCourseWithValidValues_shouldSucceed(){
+    public void getCourseByCourseId_withInvalidCourseId_throwsInvalidInputException(){
+        String invalidIdTest = "12345";
+        webTestClient.get()
+                .uri("/courses/{courseId}", invalidIdTest)
+                .accept(MediaType.APPLICATION_JSON)
+                .exchange()
+                .expectStatus().isEqualTo(422)
+                .expectHeader().contentType(MediaType.APPLICATION_JSON)
+                .expectBody()
+                .jsonPath("$.message").isEqualTo("The course ID needs to be 36 characters: " + invalidIdTest);
+    }
+
+    @Test
+    public void addNewCourseWithValidValues_ShouldSucceed(){
         CourseRequestDTO courseRequestDTO = CourseRequestDTO.builder()
-                .courseName("Java one")
-                .courseNumber("9908")
-                .numHours(987)
-                .numCredits(2.0)
-                .department("CompSci")
+                .courseName("DATABASE")
+                .courseNumber("420-NA")
+                .numHours(80)
+                .numCredits(3.0)
+                .department("COMPUTER SCIENCE")
                 .build();
 
         webTestClient.post()
@@ -130,29 +132,22 @@ class CourseControllerTest {
                     assertNotNull(courseResponseDTO);
                     assertNotNull(courseResponseDTO.getCourseId());
                     assertThat(courseResponseDTO.getCourseName()).isEqualTo(courseResponseDTO.getCourseName());
-
-
+                    assertThat(courseResponseDTO.getCourseNumber()).isEqualTo(courseResponseDTO.getCourseNumber());
+                    assertThat(courseResponseDTO.getDepartment()).isEqualTo(courseResponseDTO.getDepartment());
                 });
-
-
     }
 
     @Test
     public void updateCourse_withValidId() {
-        String validCourseName = ".net programming";
+        String validCourseNumber = "12345";
 
         CourseRequestDTO courseRequestDTO = CourseRequestDTO.builder()
-
-                .courseName(validCourseName)
-                .courseNumber(course2.getCourseNumber())
-                .numHours(course2.getNumHours())
-                .numCredits(course2.getNumCredits())
+                .courseName(course2.getCourseName())
+                .courseNumber(validCourseNumber)
                 .department(course2.getDepartment()).build();
 
-
-
         webTestClient.put()
-                .uri("/courses/{courseId}",course2.getCourseId())
+                .uri("/courses/{courseId}", course2.getCourseId())
                 .accept(MediaType.APPLICATION_JSON)
                 .contentType(MediaType.APPLICATION_JSON)
                 .bodyValue(courseRequestDTO)
@@ -164,80 +159,40 @@ class CourseControllerTest {
                 .value((courseResponseDTO -> {
                     assertNotNull(courseResponseDTO);
                     assertThat(courseResponseDTO.getCourseId()).isEqualTo(course2.getCourseId());
-                    assertThat(courseResponseDTO.getCourseName()).isEqualTo(validCourseName);
-                    assertThat(courseResponseDTO.getCourseNumber()).isEqualTo(course2.getCourseNumber());
-                    assertThat(courseResponseDTO.getNumCredits()).isEqualTo(course2.getNumCredits());
+                    assertThat(courseResponseDTO.getCourseName()).isEqualTo(course2.getCourseName());
+                    assertThat(courseResponseDTO.getCourseNumber()).isEqualTo(validCourseNumber);
                     assertThat(courseResponseDTO.getDepartment()).isEqualTo(course2.getDepartment());
-                    assertThat(courseResponseDTO.getNumHours()).isEqualTo(course2.getNumHours());
-
-
                 }));;
     }
 
-
     @Test
-    public void updateCourse_withInvalidId() {
-        String validLastName = "Bedard";
-        String courseId="9870";
-
-        CourseRequestDTO courseRequestDTO = CourseRequestDTO.builder()
-                .courseNumber(course2.getCourseNumber())
-                .courseName(validLastName)
-                .numHours(course2.getNumHours())
-                .numHours(course2.getNumHours())
-                .numCredits(course2.getNumCredits())
-                .department(course2.getDepartment()).build();
-
-        webTestClient.put()
-                .uri("/courses/{courseId}",courseId)
-                .accept(MediaType.APPLICATION_JSON)
-                .bodyValue(courseRequestDTO)
-                .exchange()
-                .expectStatus().isEqualTo(HttpStatus.NOT_FOUND)
-                .expectBody();
-
-    }
-
-    @Test
-    public void whenDeleteCourse_thenDeleteCourse() {
-
-
+    public void deleteCourse_withValidId(){
         webTestClient.delete()
-                .uri("/courses/{courseId}",course2.getCourseId())
+                .uri("/courses/{courseId}", course1.getCourseId())
                 .accept(MediaType.APPLICATION_JSON)
                 .exchange()
                 .expectStatus().isNoContent();
-
     }
 
     @Test
-    public void whenDeleteCourse_WithInvalidIdThrowNotFoundException() {
-
-        String invalidId= "143";
+    public void deleteCourse_throwsInvalidInputException(){
+        String invalidIdTest = "12345";
         webTestClient.delete()
-                .uri("/courses/{courseId}", invalidId)
+                .uri("/courses/{courseId}",invalidIdTest)
                 .accept(MediaType.APPLICATION_JSON)
                 .exchange()
-                .expectStatus().isNotFound()
+                .expectStatus().isEqualTo(422)
                 .expectHeader().contentType(MediaType.APPLICATION_JSON)
                 .expectBody()
-                .jsonPath("$.message").isEqualTo("Course with this Id wasn't found: " + invalidId);
-
+                .jsonPath("$.message").isEqualTo("The course ID needs to be 36 characters: " + invalidIdTest);
     }
-
-
 
     private Course buildCourse(String courseName, String courseId){
         return Course.builder()
+                .courseName(courseName)
+                .department("COMPUTER SCIENCE")
                 .courseId(courseId)
-                .courseNumber("9807")
-                .courseName("Java Web")
-                .numCredits(76.0)
-                .numHours(6)
-                .department("Comp Sci")
                 .build();
     }
-
-
 
 }
