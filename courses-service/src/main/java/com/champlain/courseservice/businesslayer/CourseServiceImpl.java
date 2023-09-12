@@ -71,14 +71,16 @@ public class CourseServiceImpl implements CourseService{
     @Override
     public Mono<Void> removeCourse(String courseId) {
 
-
         if(courseId.length() != 36){
             return Mono.error(new InvalidInputException("The course ID needs to be 36 characters: " + courseId));
         }
 
         return courseRepository.findCourseByCourseId(courseId)
                 .switchIfEmpty(Mono.error(new NotFoundException("Course with this Id wasn't found: " + courseId)))
-                .flatMap(courseRepository::delete);
+                .flatMap(course -> {
+                    courseRepository.delete(course);
+                    return Mono.empty();
+                });
     }
 
 }

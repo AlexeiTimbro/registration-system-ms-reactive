@@ -84,7 +84,10 @@ public class StudentServiceImpl implements StudentService{
 
         return studentRepository.findStudentByStudentId(studentId)
                 .switchIfEmpty(Mono.error(new NotFoundException("Student with this Id wasn't found: " + studentId)))
-                .flatMap(studentRepository::delete);
+                .flatMap(student -> {
+                    studentRepository.delete(student);
+                    return Mono.empty();
+                });
     }
 
 }

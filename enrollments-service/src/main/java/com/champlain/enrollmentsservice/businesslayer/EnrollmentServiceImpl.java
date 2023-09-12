@@ -113,7 +113,6 @@ public class EnrollmentServiceImpl implements EnrollmentService {
                 .flatMap(enrollmentRepository::delete);
     }
 
-
     private Mono<RequestContextAdd> courseRequestResponse(RequestContextAdd rc) {
         return this.courseClient.getCourseByCourseId(rc.getEnrollmentRequestDTO().getCourseId())
                 .doOnNext(rc::setCourseResponseDTO)

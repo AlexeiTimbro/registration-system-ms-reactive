@@ -12,7 +12,6 @@ public interface EnrollmentRepository extends ReactiveCrudRepository<Enrollment,
 
     Flux<Enrollment> findAllEnrollmentByCourseId(String courseId);
 
-
     Flux<Enrollment> findAllEnrollmentByEnrollmentYear(Integer enrollmentYear);
 
 }

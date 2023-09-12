@@ -12,6 +12,7 @@ import reactor.core.publisher.Mono;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
+import static org.springframework.http.MediaType.APPLICATION_JSON;
 
 @WebFluxTest(controllers = StudentController.class)
 class StudentControllerUnitTest {
@@ -53,6 +54,26 @@ class StudentControllerUnitTest {
         verify(studentService, times(1))
                 .getStudentById(studentResponseDTO.getStudentId());
 
+    }
+
+    @Test
+    void removeStudentByStudentId_ValidIdShouldSucceed() {
+        // Arrange
+        String studentId = "c2db7b50-26b5-43f0-ab03-8dc5dab937fb";
+
+        when(studentService.deleteStudentById(studentId))
+                .thenReturn(Mono.empty());
+
+        // Act & Assert
+        webTestClient
+                .delete()
+                .uri("/students/{studentId}", studentId)
+                .accept(APPLICATION_JSON)
+                .exchange()
+                .expectStatus().isNoContent();
+
+        verify(studentService, times(1))
+                .deleteStudentById(studentId);
     }
 
     @Test

@@ -19,11 +19,10 @@ import java.util.UUID;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.springframework.boot.test.context.SpringBootTest.WebEnvironment.RANDOM_PORT;
-import static org.springframework.web.reactive.function.server.RequestPredicates.accept;
 
 @SpringBootTest(webEnvironment = RANDOM_PORT, properties = {"spring.data.mongodb.port: 0"})
 @AutoConfigureWebTestClient
-class ControllerIntegrationTest {
+class StudentControllerIntegrationTest {
 
     @Autowired
     WebTestClient webTestClient;
@@ -63,7 +62,7 @@ class ControllerIntegrationTest {
     }
 
     @Test
-    void getAllStudents_expected5(){
+    void getAllStudents_expected(){
         webTestClient.get()
                 .uri("/students")
                 .accept(MediaType.valueOf(MediaType.TEXT_EVENT_STREAM_VALUE))

@@ -13,11 +13,16 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
+import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 import reactor.test.StepVerifier;
 
+import java.util.HashMap;
+import java.util.Map;
+
 import static com.champlain.enrollmentsservice.dataaccesslayer.Semester.SPRING;
 import static org.junit.jupiter.api.Assertions.*;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.when;
 
@@ -98,6 +103,61 @@ class EnrollmentServiceUnitTest {
                     assertEquals(enrollment.getCourseNumber(), foundEnrollment.getCourseNumber());
 
                 })
+                .verifyComplete();
+    }
+
+    @Test
+    void getAllEnrollments() {
+        //arrange
+        when(enrollmentRepository.findAll()).thenReturn(Flux.just(enrollment));
+
+        when(enrollmentRepository.findAllEnrollmentByStudentId(anyString())).thenReturn(Flux.just(enrollment));
+
+        //act
+        Map<String, String> queryParameters = new HashMap<>();
+        queryParameters.put("studentId", "id");
+
+        Flux<EnrollmentResponseDTO> enrollmentResponseDTOFlux = enrollmentService.getAllEnrollments(queryParameters);
+
+        //assert
+        StepVerifier
+                .create(enrollmentResponseDTOFlux)
+                .consumeNextWith(foundEnrollment ->{
+
+                    assertNotNull(foundEnrollment);
+                    assertEquals(enrollment.getEnrollmentId(), foundEnrollment.getEnrollmentId());
+                    assertEquals(enrollment.getEnrollmentYear(), foundEnrollment.getEnrollmentYear());
+                    assertEquals(enrollment.getSemester(), foundEnrollment.getSemester());
+                    assertEquals(enrollment.getStudentId(), foundEnrollment.getStudentId());
+                    assertEquals(enrollment.getStudentFirstName(), foundEnrollment.getStudentFirstName());
+                    assertEquals(enrollment.getStudentLastName(), foundEnrollment.getStudentLastName());
+                    assertEquals(enrollment.getCourseId(), foundEnrollment.getCourseId());
+                    assertEquals(enrollment.getCourseNumber(), foundEnrollment.getCourseNumber());
+                    assertEquals(enrollment.getCourseName(), foundEnrollment.getCourseName());
+                })
+                .verifyComplete();
+    }
+
+    @Test
+    void removeEnrollmentByValidEnrollmentId_ShouldSucceed() {
+        //Arrange
+        String enrollmentId = "c2db7b50-26b5-43f0-ab03-8dc5dab937fb";
+
+        when(enrollmentRepository.delete(any(Enrollment.class)))
+                .thenReturn(Mono.empty());
+
+        when(enrollmentRepository.findEnrollmentByEnrollmentId(enrollmentId))
+                .thenReturn(Mono.just(new Enrollment()));
+
+        when(enrollmentRepository.delete(any(Enrollment.class)))
+                .thenReturn(Mono.empty());
+
+        //Act
+        Mono<Void> deletionMono = enrollmentService.deleteEnrollmentById(enrollmentId);
+
+        //Assert
+        StepVerifier
+                .create(deletionMono)
                 .verifyComplete();
     }
 }
